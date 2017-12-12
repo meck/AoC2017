@@ -4,6 +4,7 @@ import Data.Char
 import Data.List
 import Data.List.Split
 import Control.Monad
+import qualified Data.Map.Strict as M
 
 data Program = Program
   { num :: Int
@@ -16,26 +17,23 @@ instance Eq Program where
 instance Ord Program where
   compare a b = compare (num a) (num b)
 
-buildTree :: Int -> [(Int, [Int])] -> Program
-buildTree r i = Program r $ map (`buildTree`i) (children r)
-  where children n = snd $ head $ filter ((==) n . fst) i
+buildTree :: Int -> M.Map Int [Int] -> Program
+buildTree r i = Program r $ map (`buildTree`i) (i M.! r)
 
-findInGroup :: Program -> [Program]
-findInGroup prg = go prg []
+findGroup :: Program -> [Program]
+findGroup p = go p []
  where
   go p found = sort $ foldr
     (\x acc -> if x `elem` acc then acc else go x acc)
     (p : found)
     (pipes p)
 
-solve1 = length . findInGroup . buildTree 0
+solve1 = length . findGroup . buildTree 0
+solve2 m = length $ M.mapKeys (head . findGroup . flip buildTree m) m
 
-solve2 a =
-  length $ group $ sort $ map (head . findInGroup . flip buildTree a . fst) a
-
-prepareInput :: String -> [(Int, [Int])]
+prepareInput :: String -> M.Map Int [Int]
 prepareInput =
-  map (liftM2 (,) head tail) . map (map read . words) . lines . filter
+  M.fromList . map (liftM2 (,) head tail . map read . words) . lines . filter
     (liftM2 (||) isNumber isSpace)
 
 main :: IO ()
