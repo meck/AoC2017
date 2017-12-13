@@ -22,7 +22,7 @@ costOfState d (State fw t) =
         _        -> Nothing
 
 posOfScan :: Ticks -> Range -> Pos
-posOfScan t r = if fst p `mod` 2 == 0 then snd p else abs (snd p - r + 1)
+posOfScan t r = if even $ fst p then snd p else abs (snd p - r + 1)
   where p = divMod t (r - 1)
 
 allStates :: Firewall -> [State]
@@ -30,8 +30,8 @@ allStates fw = [ State fw t | t <- [0 .. (fst $ Map.findMax fw)] ]
 
 solve1 = sum . mapMaybe (costOfState 0) . allStates
 solve2 fw = length $ takeWhile
-  (not . all isNothing)
-  [ map (costOfState d) $ allStates fw | d <- [0 ..] ]
+  not
+  [ all isNothing . map (costOfState d) $ allStates fw | d <- [0 ..] ]
 
 prepareInput :: String -> Firewall
 prepareInput =
