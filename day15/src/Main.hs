@@ -18,15 +18,19 @@ genStepOne fact = iterate (modMers . (*) fact)
   modMers k = if i >= genDiv then i - genDiv else i
     where i = (k .&. genDiv) + (k `shiftR` genDivP)
 
+pairsOne :: (Int, Int) -> [(Int, Int)]
 pairsOne (a, b) = drop 1 $ zip (genStepOne genAFact a) (genStepOne genBFact b)
 
 -- Part 2
+genStepTwo :: Int -> Int -> Int -> [Int]
 genStepTwo fact evenDiv start =
-  [ i | i <- genStepOne fact start, i `mod` evenDiv == 0 ]
+  [ i | i <- genStepOne fact start, i `rem` evenDiv == 0 ]
 
+pairsTwo :: (Int, Int) -> [(Int, Int)]
 pairsTwo (a, b) =
   drop 1 $ zip (genStepTwo genAFact 4 a) (genStepTwo genBFact 8 b)
 
+judge :: (Int, Int) -> Int
 judge (a, b) = if go a `xor` go b == 0 then 1 else 0
   where go x = fromIntegral x :: Word16
 
